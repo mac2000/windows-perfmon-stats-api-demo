@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http.Formatting;
@@ -22,12 +23,14 @@ namespace PerfmonApi
 		protected void Application_Start(object sender, EventArgs e)
 		{
 			Add("cpu", new PerformanceCounter("Processor", "% Processor Time", "_Total"));
-			Add("ram", new PerformanceCounter("Memory", "Available MBytes"));
-
+			Add("ram", new PerformanceCounter("Memory", "% Committed Bytes In Use"));
+			Add("hdd", new PerformanceCounter("PhysicalDisk", "% Disk Time", "_Total"));
 
 			_timer.Interval = 1000;
 			_timer.Elapsed += CollectValues;
 			_timer.Start();
+
+			HttpContext.Current.Application["_values"] = _values;
 
 			GlobalConfiguration.Configure(config =>
 			{
@@ -44,6 +47,7 @@ namespace PerfmonApi
 
 		private void CollectValues(object sender, ElapsedEventArgs e)
 		{
+			var stats = new Dictionary<string, float>();
 			foreach (var key in _counters.Keys)
 			{
 				var value = _counters[key].NextValue();
@@ -54,9 +58,10 @@ namespace PerfmonApi
 					{
 					}
 				}
+				stats.Add(key, value);
 			}
 
-			SocketService.SendStats(JsonConvert.SerializeObject(_values));
+			SocketService.SendStats(stats);
 		}
 
 		protected void Application_End(object sender, EventArgs e)

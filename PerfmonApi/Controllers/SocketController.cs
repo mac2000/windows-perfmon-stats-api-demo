@@ -10,8 +10,8 @@ namespace PerfmonApi.Controllers
 	public class SocketController : ApiController
 	{
 		[HttpGet]
-		[Route("socket")]
-		public HttpResponseMessage Get()
+		[Route(nameof(Socket))]
+		public HttpResponseMessage Socket()
 		{
 			HttpContext.Current.AcceptWebSocketRequest(new SocketService());
 			return Request.CreateResponse(HttpStatusCode.SwitchingProtocols);

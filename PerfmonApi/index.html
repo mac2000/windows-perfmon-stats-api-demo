@@ -3,21 +3,145 @@
 <head>
 	<meta charset="utf-8" />
 	<title>stats</title>
+	<style>
+		html, body, table, th, td, fieldset {
+			padding: 0;
+			margin: 0;
+			border: none;
+		}
+
+		html, body, table {
+			height: 100%;
+		}
+
+		table {
+			width: 100%;
+			border-spacing: 5px;
+		}
+
+		th, td {
+			height: 33%;
+		}
+
+		th {
+			font: inherit;
+			vertical-align: middle;
+			white-space: nowrap;
+			width: 3em;
+			font: normal 42px/2 monospace;
+			color: #333;
+		}
+
+		fieldset {
+			border: none;
+			margin: 0;
+			padding: 0
+		}
+
+		legend,
+		output:after {
+			font-size: 50%;
+			color: #999;
+		}
+
+		output:after {
+			content: '%';
+			margin-left: .2em;
+		}
+	</style>
 </head>
 <body>
-	<h2>demo</h2>
+	<table>
+		<tr>
+			<td id="cpu"></td>
+			<th>
+				<fieldset>
+					<legend>cpu</legend>
+					<output class="cpu">99</output>
+				</fieldset>
+			</th>
+		</tr>
+		<tr>
+			<td id="ram"></td>
+			<th>
+				<fieldset>
+					<legend>ram</legend>
+					<output class="ram">99</output>
+				</fieldset>
+			</th>
+		</tr>
+		<tr>
+			<td id="hdd"></td>
+			<th>
+				<fieldset>
+					<legend>hdd</legend>
+					<output class="hdd">99</output>
+				</fieldset>
+			</th>
+		</tr>
+	</table>
 
+	<script src="https://code.highcharts.com/highcharts.js"></script>
 	<script>
 		const STATS_EVENT = 'stats';
 
 		(function connect() {
 			console.log('connecting');
 			const ws = new WebSocket(`ws://${location.host}/socket`);
-			ws.onmessage = ({data}) => window.dispatchEvent(new CustomEvent(STATS_EVENT, { detail: JSON.parse(data) }));
+			ws.onmessage = ({ data }) => window.dispatchEvent(new CustomEvent(STATS_EVENT, { detail: JSON.parse(data) }));
 			ws.onclose = () => setTimeout(connect, 5000);
 		})();
 
-		window.addEventListener(STATS_EVENT, ({detail}) => console.log('DATA', detail));
+		const chart = (name, data, color) => {
+			Highcharts.chart(name,
+				{
+					chart: {
+						margin: [0, 0, 0, 0],
+						spacingTop: 0,
+						spacingBottom: 0,
+						spacingLeft: 0,
+						spacingRight: 0,
+						borderColor: color,
+						borderWidth: 1,
+						type: 'area',
+						events: {
+							load: function () {
+								const series = this.series[0];
+								window.addEventListener(STATS_EVENT, ({ detail }) => {
+									series.addPoint(detail[name]);
+									document.querySelector(`output.${name}`).innerText = detail[name].toFixed(0);
+
+								});
+							}
+						}
+					},
+					plotOptions: {
+						series: {
+							enableMouseTracking: false
+						}
+					},
+					title: false,
+					yAxis: { min: 0, max: 100, visible: false },
+					xAxis: { visible: false },
+					tooltip: { enabled: false },
+					credits: { enabled: false },
+					legend: false,
+					series: [
+						{
+							name,
+							data: data[name],
+							color
+						}
+					]
+				});
+		}
+
+		fetch('/stats').then(res => res.json()).then(data => {
+			chart('cpu', data, '#4096EE');
+			chart('ram', data, '#7e3878');
+			chart('hdd', data, '#99b433');
+		});
 	</script>
 </body>
+
 </html>

@@ -1,4 +1,6 @@
-﻿using Microsoft.Web.WebSockets;
+﻿using System.Collections.Generic;
+using Microsoft.Web.WebSockets;
+using Newtonsoft.Json;
 
 namespace PerfmonApi.Services
 {
@@ -10,6 +12,7 @@ namespace PerfmonApi.Services
 
 		//public override void OnMessage(string message) => Clients.Broadcast(message);
 
-		public static void SendStats(string message) => Clients.Broadcast(message);
+		public static void SendStats(Dictionary<string, float> stats) => SendMessage(JsonConvert.SerializeObject(stats));
+		private static void SendMessage(string message) => Clients.Broadcast(message);
 	}
 }
