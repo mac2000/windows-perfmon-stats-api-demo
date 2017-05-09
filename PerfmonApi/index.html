@@ -2,29 +2,22 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<title></title>
+	<title>stats</title>
 </head>
 <body>
 	<h2>demo</h2>
 
 	<script>
-		const ws = new WebSocket(`ws://${location.host}/socket`);
-		ws.addEventListener('message',
-			event => {
-				const data = JSON.parse(event.data);
-				console.log('DATA', data);
-				//window.dispatchEvent(new CustomEvent(type, { detail }));
-			});
-	// dispatcher mimics signature of custom events
-	//const dispatchSocketEvent = ({ type, detail }) => ws.send(JSON.stringify({ type, detail }));
+		const STATS_EVENT = 'stats';
 
-	// can be used in components ComponentWillMount/Unmount
-	//window.addEventListener('tickettaken', ({ detail }) => console.log('ticket taken event catched', detail));
+		(function connect() {
+			console.log('connecting');
+			const ws = new WebSocket(`ws://${location.host}/socket`);
+			ws.onmessage = ({data}) => window.dispatchEvent(new CustomEvent(STATS_EVENT, { detail: JSON.parse(data) }));
+			ws.onclose = () => setTimeout(connect, 5000);
+		})();
 
-
-	//const dispatchTicketTakenEvent = id => dispatchSocketEvent({ type: 'tickettaken', detail: { id } });
-	//b1.addEventListener('click', () => dispatchTicketTakenEvent(1));
-	//b2.addEventListener('click', () => dispatchTicketTakenEvent(1));
+		window.addEventListener(STATS_EVENT, ({detail}) => console.log('DATA', detail));
 	</script>
 </body>
 </html>

@@ -6,6 +6,7 @@ using System.Net.Http.Formatting;
 using System.Timers;
 using System.Web;
 using System.Web.Http;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using PerfmonApi.Services;
 
@@ -22,6 +23,7 @@ namespace PerfmonApi
 		{
 			Add("cpu", new PerformanceCounter("Processor", "% Processor Time", "_Total"));
 			Add("ram", new PerformanceCounter("Memory", "Available MBytes"));
+
 
 			_timer.Interval = 1000;
 			_timer.Elapsed += CollectValues;
@@ -54,7 +56,7 @@ namespace PerfmonApi
 				}
 			}
 
-			SocketService.SendStats(Newtonsoft.Json.JsonConvert.SerializeObject(_values["cpu"]));
+			SocketService.SendStats(JsonConvert.SerializeObject(_values));
 		}
 
 		protected void Application_End(object sender, EventArgs e)

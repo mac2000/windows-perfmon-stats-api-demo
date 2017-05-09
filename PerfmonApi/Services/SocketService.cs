@@ -8,7 +8,7 @@ namespace PerfmonApi.Services
 
 		public override void OnOpen() => Clients.Add(this);
 
-		// public override void OnMessage(string message) => Clients.Broadcast(message);
+		//public override void OnMessage(string message) => Clients.Broadcast(message);
 
 		public static void SendStats(string message) => Clients.Broadcast(message);
 	}
