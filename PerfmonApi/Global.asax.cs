@@ -7,6 +7,7 @@ using System.Timers;
 using System.Web;
 using System.Web.Http;
 using Newtonsoft.Json.Serialization;
+using PerfmonApi.Services;
 
 namespace PerfmonApi
 {
@@ -36,7 +37,7 @@ namespace PerfmonApi
 		private void Add(string name, PerformanceCounter counter)
 		{
 			_counters.GetOrAdd(name, key => counter);
-			_values.GetOrAdd("cpu", new ConcurrentQueue<float>());
+			_values.GetOrAdd(name, new ConcurrentQueue<float>());
 		}
 
 		private void CollectValues(object sender, ElapsedEventArgs e)
@@ -52,7 +53,8 @@ namespace PerfmonApi
 					}
 				}
 			}
-			// TODO: push into socket
+
+			SocketService.SendStats(Newtonsoft.Json.JsonConvert.SerializeObject(_values["cpu"]));
 		}
 
 		protected void Application_End(object sender, EventArgs e)

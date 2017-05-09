@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title></title>
+</head>
+<body>
+	<h2>demo</h2>
+
+	<script>
+		const ws = new WebSocket(`ws://${location.host}/socket`);
+		ws.addEventListener('message',
+			event => {
+				const data = JSON.parse(event.data);
+				console.log('DATA', data);
+				//window.dispatchEvent(new CustomEvent(type, { detail }));
+			});
+	// dispatcher mimics signature of custom events
+	//const dispatchSocketEvent = ({ type, detail }) => ws.send(JSON.stringify({ type, detail }));
+
+	// can be used in components ComponentWillMount/Unmount
+	//window.addEventListener('tickettaken', ({ detail }) => console.log('ticket taken event catched', detail));
+
+
+	//const dispatchTicketTakenEvent = id => dispatchSocketEvent({ type: 'tickettaken', detail: { id } });
+	//b1.addEventListener('click', () => dispatchTicketTakenEvent(1));
+	//b2.addEventListener('click', () => dispatchTicketTakenEvent(1));
+	</script>
+</body>
+</html>
